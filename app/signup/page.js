@@ -27,7 +27,7 @@ const ERR_MSGS = {
 
 let socket = null;
 
-export default function page() {
+export default function Page() {
   const [userName, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [pwrd, setPwrd] = useState("");

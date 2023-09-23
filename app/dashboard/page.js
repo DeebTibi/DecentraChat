@@ -17,7 +17,7 @@ const MODAL_MESSAGES = {
   operation_success: "Your request was successful",
   operation_fail: "An error occured",
 };
-export default function page() {
+export default function Page() {
   const [isAuth, setIsAuth] = useState(true);
   const [isConnected, setIsConnected] = useState(false);
   const [user_name, setName] = useState("");
