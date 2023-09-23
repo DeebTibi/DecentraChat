@@ -1,0 +1,65 @@
+.input_big {
+  padding: 2em;
+  font-family: "DM Sans", sans-serif;
+  font-weight: 500;
+  font-size: 2em;
+}
+
+.input_medium {
+  padding: 1em;
+  font-family: "DM Sans", sans-serif;
+  font-weight: 400;
+  font-size: 1em;
+}
+
+.input_small {
+  padding: 0.7em;
+  font-family: "DM Sans", sans-serif;
+  font-weight: 500;
+  font-size: 0.3em;
+}
+
+.input_normal {
+  color: var(--color-500);
+  border-color: 5px solid var(--color-500);
+  border-radius: 10px;
+  background-color: var(--color-200);
+}
+
+.input_inverse {
+  color: var(--color-500);
+  border-color: 5px solid var(--color-500);
+  border-radius: 10px;
+  background-color: var(--color-200);
+}
+
+.container {
+  width: 100%;
+  height: fit-content;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: flex-start;
+  gap: 3px;
+}
+
+.input {
+  width: 90%;
+}
+
+.text_big {
+  font-family: "DM Sans", sans-serif;
+  font-weight: 600;
+  font-size: 2em;
+}
+
+.text_medium {
+  font-family: "DM Sans", sans-serif;
+  font-weight: 600;
+  font-size: 1em;
+}
+.text_small {
+  font-family: "DM Sans", sans-serif;
+  font-weight: 600;
+  font-size: 0.3em;
+}

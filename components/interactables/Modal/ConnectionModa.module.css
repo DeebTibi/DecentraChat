@@ -1,0 +1,28 @@
+.container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  background-color: var(--color-200-t);
+  position: absolute;
+}
+.modal {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1.5em;
+  background-color: var(--color-300);
+}
+
+.grey_out {
+}
+
+.text {
+  font-family: "DM Sans", sans-serif;
+  font-weight: 600;
+  color: var(--color-200);
+  font-size: 2em;
+}
