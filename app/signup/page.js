@@ -68,7 +68,8 @@ export default function Page() {
     const port = process.env.NEXT_PUBLIC_PORT;
     const env = process.env.NODE_ENV;
     const url =
-      env == "development" ? `ws://localhost:${port}` : `ws://${ip}:${port}`;
+      env == "development" ? `ws://localhost:5000` : `wss://${ip}:${port}`;
+    console.log(url);
     socket = new WebSocket(url);
 
     socket.onopen = () => {
