@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import style from "./signup.module.css";
+import style from "./login.module.css";
 import InputForm from "@/components/interactables/InputForm/InputForm";
 import Button from "@/components/interactables/Button/Button";
 import validator from "validator";
@@ -35,7 +35,6 @@ const ERR_MSGS = {
 };
 
 export default function Page() {
-  const [userName, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [pwrd, setPwrd] = useState("");
   const [showTTLModal, setShowTTLModal] = useState(false);
@@ -46,7 +45,7 @@ export default function Page() {
 
   const handleClick = async () => {
     const isEmailValid = validator.isEmail(email);
-    if (userName == "" || pwrd == "") {
+    if (pwrd == "") {
       printErrMessage(ERR_MSGS.fill_form);
       return;
     }
@@ -60,12 +59,11 @@ export default function Page() {
   };
 
   const getAccess = async () => {
-    const requestData = { ...SERVER_REQUESTS.SIGNUP };
+    const requestData = { ...SERVER_REQUESTS.LOGIN };
     requestData.email = email;
-    requestData.name = userName;
     requestData.password = pwrd;
     try {
-      const response = await axios.post("/signup", requestData, {
+      const response = await axios.post("/login", requestData, {
         headers: {
           "Content-Type": "application/json", // Set the content type to JSON
         },
@@ -146,19 +144,9 @@ export default function Page() {
     <main className={style.main}>
       <TTLModal text={modalTitle} info={modalInfo} isOpen={showTTLModal} />
       <LoadingScreen isVisible={loading} />
-      <a className={style.text}>SIGN UP</a>
+      <a className={style.text}>LOGIN</a>
       <div className={style.form_container}>
-        <div className={style.helper_text}>
-          Before we begin, you need to create an account.
-        </div>
         <div className={style.input_container}>
-          <InputForm
-            placeholder="User Name"
-            size="medium"
-            value={userName}
-            setValue={setUsername}
-            variation={"normal"}
-          />
           <InputForm
             placeholder="Email"
             size="medium"
@@ -178,18 +166,10 @@ export default function Page() {
           <Button
             isBtn={false}
             onClick={handleClick}
-            text={"Sign Up"}
+            text={"Login"}
             theme={"btn_inverse"}
             size={"btn_medium"}
           ></Button>
-        </div>
-        <div
-          className={style.login_text}
-          onClick={() => {
-            push("/login");
-          }}
-        >
-          Already a user? login.
         </div>
       </div>
     </main>

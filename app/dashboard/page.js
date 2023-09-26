@@ -10,6 +10,7 @@ import Button from "@/components/interactables/Button/Button";
 import AddChat from "@/components/interactables/AddChat/AddChat";
 import CHAT_MODES from "@/source/scheme/chat_modes";
 import TTLModal from "@/components/interactables/Modal/TTLModal";
+import { useRouter } from "next/navigation";
 
 let socket;
 let activeChat = {};
@@ -18,18 +19,27 @@ const MODAL_MESSAGES = {
   operation_fail: "An error occured",
 };
 export default function Page() {
-  const [isAuth, setIsAuth] = useState(true);
   const [isConnected, setIsConnected] = useState(false);
-  const [user_name, setName] = useState("");
-  const [user_email, setEmail] = useState("");
   const [loading, setLoading] = useState(true);
-  const [chats, setChats] = useState([]);
+  const [chats, setChats] = useState(null);
   const [displayMode, setDisplayMode] = useState(CHAT_MODES.NONE);
   const [popUpModalTxt, setPopUpModalTxt] = useState("");
   const [popUpModalState, setPopUpModalState] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
+  const { push } = useRouter();
 
   useEffect(() => {
+    if (chats === null) return;
+    if (loading === false) return;
+    setLoading(false);
+  }, [chats]);
+
+  useEffect(() => {
+    const jwt = getJWT();
+    if (!jwt) {
+      declareInvalidJWT();
+      return;
+    }
     connectWebsocket();
   }, []);
 
@@ -46,14 +56,13 @@ export default function Page() {
     return () => clearTimeout(timer);
   }, [popUpModalState]);
 
-  useEffect(() => {
-    if (!isConnected || !user_email || !user_name) return;
-    setLoading(true);
-    if (chats.length == 0) {
-      requestChats();
-    }
-    setLoading(false);
-  }, [isConnected, user_email, user_name]);
+  const getJWT = () => {
+    return localStorage.getItem("JWT");
+  };
+
+  const declareInvalidJWT = () => {
+    push("/signup");
+  };
 
   const pushModalMessage = (msg) => {
     setPopUpModalTxt(msg);
@@ -75,14 +84,13 @@ export default function Page() {
     request.group_id = chatId;
     request.group_name = chatName;
     request.content = content;
-    request.user_name = localStorage.getItem("user_name");
+    request.jwt = localStorage.getItem("JWT");
     socket.send(JSON.stringify(request));
   };
 
   const joinChat = (chatName, chatId) => {
     const request = { ...SERVER_REQUESTS.JOIN_GROUP };
-    request.email = localStorage.getItem("user_email");
-    request.name = localStorage.getItem("user_name");
+    request.jwt = localStorage.getItem("JWT");
     request.group_name = chatName;
     request.group_id = chatId;
     socket.send(JSON.stringify(request));
@@ -92,16 +100,13 @@ export default function Page() {
     const request = { ...SERVER_REQUESTS.CREATE_GROUP };
     request.group_description = "an experimental group";
     request.group_name = chatName;
-    request.email = localStorage.getItem("user_email");
-    request.name = localStorage.getItem("user_name");
+    request.jwt = localStorage.getItem("JWT");
     socket.send(JSON.stringify(request));
   };
 
   const requestChats = () => {
-    if (!isConnected) return;
     let request = { ...SERVER_REQUESTS.GET_USER_CHATS };
-    request.email = user_email;
-    request.name = user_name;
+    request.jwt = localStorage.getItem("JWT");
     socket.send(JSON.stringify(request));
   };
 
@@ -109,6 +114,7 @@ export default function Page() {
     let request = { ...SERVER_REQUESTS.GET_MISSED_MESSAGES };
     request.group_id = chatId;
     request.group_name = chatName;
+    request.jwt = localStorage.getItem("JWT");
     socket.send(JSON.stringify(request));
     return;
   };
@@ -138,7 +144,6 @@ export default function Page() {
   };
 
   function displayChats() {
-    //console.log(chats);
     if (chats.length == 0) return <></>;
     return chats.map((item) => {
       return (
@@ -169,17 +174,17 @@ export default function Page() {
     const ip = process.env.NEXT_PUBLIC_PUBLIC_ENDPOINT;
     const port = process.env.NEXT_PUBLIC_PORT;
     const env = process.env.NODE_ENV;
-    const url =
-      env == "development" ? `ws://localhost:5000` : `wss://${ip}:${port}`;
+    const url = env == "development" ? `ws://localhost:8081` : `wss://${ip}`;
     socket = new WebSocket(url);
+
     socket.onopen = () => {
       console.log("connection opened");
       setIsConnected(true);
-      const email = localStorage.getItem("user_email");
-      const name = localStorage.getItem("user_name");
-      setEmail(email);
-      setName(name);
-      requestAuth();
+      try {
+        requestChats();
+      } catch (err) {
+        console.log("Could not request chats" + err);
+      }
     };
 
     socket.onmessage = (event) => {
@@ -218,6 +223,11 @@ export default function Page() {
         pushModalMessage(MODAL_MESSAGES.operation_success);
       }
       if (data.type == SERVER_RESPONSE.GET_LOST_MESSAGES) handleMessages(data);
+
+      if (data.type == SERVER_RESPONSE.ILLEGAL_REQUEST) {
+        push("/signup");
+        return;
+      }
     };
 
     socket.onclose = (event) => {
@@ -230,42 +240,10 @@ export default function Page() {
     };
   };
 
-  const requestAuth = () => {
-    if (!socket) return;
-    const session = localStorage.getItem("user_session");
-    const email = localStorage.getItem("user_email");
-    const name = localStorage.getItem("user_name");
-    if (!session || !email || !name) {
-      return;
-    }
-    let request = { ...SERVER_REQUESTS.SESSION_VALIDATE };
-    request.name = name;
-    request.email = email;
-    request.session = session;
-    const payload = JSON.stringify(request);
-    socket.send(payload);
-  };
-
-  const confirmAuth = (data) => {
-    if (!data) return;
-    const status = data.status;
-    if (status != 0) {
-      setLoading(false);
-      socket.close();
-      return;
-    }
-    console.log("Authentication successful");
-    setIsAuth(true);
-  };
-
   return (
     <div className={style.container}>
       <TTLModal text={popUpModalTxt} isOpen={popUpModalState} info={""} />
       <LoadingScreen isVisible={loading} />
-      <ErrorPage
-        isVisible={!loading && !isAuth}
-        text={"Access to this page is denied."}
-      />
       <div className={style.chat_interface}>
         <AddChat
           mode={displayMode}
