@@ -233,6 +233,7 @@ export default function Page() {
     socket.onclose = (event) => {
       console.log("Connection was closed: " + event.wasClean);
       setIsConnected(false);
+      setLoading(false)
     };
 
     return () => {
@@ -244,6 +245,7 @@ export default function Page() {
     <div className={style.container}>
       <TTLModal text={popUpModalTxt} isOpen={popUpModalState} info={""} />
       <LoadingScreen isVisible={loading} />
+      <ErrorPage isVisible={!isConnected} text={"An error occured trying to connect to the server. Please refresh."}
       <div className={style.chat_interface}>
         <AddChat
           mode={displayMode}
