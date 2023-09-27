@@ -246,7 +246,7 @@ export default function Page() {
       <TTLModal text={popUpModalTxt} isOpen={popUpModalState} info={""} />
       <LoadingScreen isVisible={loading} />
       <ErrorPage
-        isVisible={!isConnected}
+        isVisible={!isConnected && !loading}
         text={
           "An error occured trying to connect to the server. Please refresh."
         }
